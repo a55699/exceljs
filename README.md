@@ -1,5 +1,7 @@
 # ExcelJS (Protobi Fork)
 
+> **Source and credit:** This repository is an independent fork of [Protobi (@protobi)](https://github.com/protobi/exceljs), which is based on [ExcelJS](https://github.com/exceljs/exceljs). Thanks to Protobi, original ExcelJS author Guyon Roche, and all contributors for the code and enhancements. The original [MIT license](LICENSE) and copyright notices are retained.
+
 > ⚠️ **Temporary Fork** - This is a bridge fork with features pending upstream merge.
 > We recommend using [official exceljs](https://github.com/exceljs/exceljs) if you don't need these specific features.
 
