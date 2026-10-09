@@ -66,3 +66,8 @@ jobs:
       - run: npx tsc index.d.ts
         env:
           CI: true
+      # spec/typescript imports the build through index.ts
+      - run: npm run build
+      - run: npm run test:typescript
+        env:
+          CI: true
