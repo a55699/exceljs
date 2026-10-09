@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime';
 
+import { PassThrough } from 'stream';
 import { expect } from 'chai';
 import ExcelJS from '../../index';
 
@@ -24,17 +25,13 @@ describe('typescript', () => {
     ws.getCell('A1').value = 7;
 
     const wb2 = new ExcelJS.Workbook();
-    const stream = wb2.xlsx.createInputStream();
+    const stream = new PassThrough();
+    const reading = wb2.xlsx.read(stream);
     await wb.xlsx.write(stream);
     stream.end();
+    await reading;
 
-    await new Promise((resolve, reject) => {
-      stream.on('done', () => {
-        const ws2 = wb2.getWorksheet('blort');
-        expect(ws2.getCell('A1').value).to.equal(7);
-        resolve();
-      });
-      stream.on('error', reject);
-    })
+    const ws2 = wb2.getWorksheet('blort');
+    expect(ws2.getCell('A1').value).to.equal(7);
   });
 });
