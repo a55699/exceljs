@@ -28,6 +28,13 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
+### Unreleased
+
+**Fixes**
+
+- Defined names of a loaded file that are not only cells are kept: names defined by a formula or a constant were dropped (or written as a broken range, like `'SUM(A'!$A$4:$B$4`), and a name of one worksheet became a name of the workbook, so two sheets with their own `Rate` were written with one `Rate` and the formulas of one sheet used the cells of the other. Hidden names stay hidden
+- The print area, print titles and names of a worksheet were given to the wrong worksheet when the file had a chartsheet before it
+
 ### 4.4.0-protobi.11.a55699.2 (2026-10-09)
 
 Tagged `v4.4.0-protobi.11.a55699.2`; package [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). Adds charts and fixes drawings with charts and images. Every change was made on its own branch with tests; the written files were checked in Excel 16.
