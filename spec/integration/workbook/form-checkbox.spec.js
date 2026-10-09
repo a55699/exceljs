@@ -139,6 +139,75 @@ describe('Workbook', () => {
       expect(shapeIds(vml)).to.deep.equal(['_x0000_s1025', '_x0000_s1026', '_x0000_s1027']);
     });
 
+    // Excel shows the value of the linked cell, not the checked state saved
+    // with the checkbox: an empty linked cell shows an unchecked box
+    describe('linked cell', () => {
+      it('gets the checked state when it is empty', async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Form');
+        worksheet.addFormCheckbox('B2', {link: 'A2', checked: true});
+        worksheet.addFormCheckbox('B4', {link: 'A4'});
+        expect(worksheet.getCell('A2').value).to.be.true();
+        expect(worksheet.getCell('A4').value).to.be.false();
+
+        const {buffer} = await writeZip(workbook);
+        const workbook2 = new ExcelJS.Workbook();
+        await workbook2.xlsx.load(buffer);
+        const worksheet2 = workbook2.getWorksheet('Form');
+        expect(worksheet2.getCell('A2').value).to.be.true();
+        expect(worksheet2.getCell('A4').value).to.be.false();
+      });
+
+      it('keeps a value already in the cell', () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Form');
+        worksheet.getCell('A2').value = false;
+        worksheet.getCell('A4').value = 'yes';
+        worksheet.addFormCheckbox('B2', {link: 'A2', checked: true});
+        worksheet.addFormCheckbox('B4', {link: 'A4', checked: true});
+        expect(worksheet.getCell('A2').value).to.be.false();
+        expect(worksheet.getCell('A4').value).to.equal('yes');
+      });
+
+      it('follows the checked and link setters', () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Form');
+        const checkbox = worksheet.addFormCheckbox('B2', {link: 'A2', checked: true});
+        checkbox.checked = false;
+        expect(worksheet.getCell('A2').value).to.be.false();
+
+        checkbox.link = 'A3';
+        expect(worksheet.getCell('A3').value).to.be.false();
+        checkbox.checked = true;
+        expect(worksheet.getCell('A3').value).to.be.true();
+        expect(worksheet.getCell('A2').value).to.be.false();
+      });
+
+      it('can be on another worksheet', () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Form');
+        const other = workbook.addWorksheet('My answers');
+        // eslint-disable-next-line quotes
+        worksheet.addFormCheckbox('B2', {link: "'My answers'!$C$3", checked: true});
+        expect(other.getCell('C3').value).to.be.true();
+        expect(worksheet.getCell('C3').value).to.equal(null);
+      });
+
+      it('is not changed when a workbook is loaded', async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Form');
+        worksheet.addFormCheckbox('B2', {link: 'A2', checked: true});
+        worksheet.getCell('A2').value = null;
+
+        const {buffer} = await writeZip(workbook);
+        const workbook2 = new ExcelJS.Workbook();
+        await workbook2.xlsx.load(buffer);
+        const worksheet2 = workbook2.getWorksheet('Form');
+        expect(worksheet2.getCell('A2').value).to.equal(null);
+        expect(worksheet2.getFormCheckboxes()[0].checked).to.be.true();
+      });
+    });
+
     describe('loaded from a file', () => {
       // Saved by Excel: three checkboxes, a button and a note on Form, and
       // one checkbox on Second
