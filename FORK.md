@@ -28,6 +28,14 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
+### 4.4.0-protobi.11 (unreleased)
+
+`package.json` is at this version; it has not been tagged or published yet.
+
+- **Number format limit guard** (Protobi [#83](https://github.com/protobi/exceljs/issues/83))
+  - New workbook option `numFmtLimit` (default 206) and `Workbook#addNumberFormat(formatCode)`, which returns the numFmtId and throws `NumberFormatLimitError` once the workbook holds `numFmtLimit` custom formats
+  - Opt-in: setting `cell.numFmt` directly does not go through this check
+
 ### 4.4.0-protobi.10 (2026-05-06)
 
 **Bug Fix: richText shared-string deduplication in streaming writer** ([#66](https://github.com/protobi/exceljs/pull/66), cherry-picked from [#50](https://github.com/protobi/exceljs/pull/50) by @gwkline)
@@ -172,9 +180,9 @@ Fixes a critical bug where comment protection properties (`locked`, `lockText`) 
   - Example: `ws.addFormCheckbox('B2:D3', { checked: true, link: 'E2', text: 'Accept terms' })`
 
 - **Page fields support for pivot tables** ([#3021](https://github.com/protobi/exceljs/issues/3021))
-  - Add `pageFields` parameter to pivot table API
+  - Add `pages` and `pageDefaults` parameters to pivot table API
   - Enables report filtering in Excel pivot tables
-  - Example: `ws.addPivotTable({ rows: ['Region'], pageFields: ['Year'] })`
+  - Example: `ws.addPivotTable({ rows: ['Region'], pages: ['Year'], pageDefaults: { Year: 2025 } })`
 
 **Security & Dependency Updates**
 
@@ -241,13 +249,13 @@ Fixes a critical bug where comment protection properties (`locked`, `lockText`) 
 
 **Production Dependencies:**
 - `archiver`: ^5.0.0 → ^5.3.2
-- `unzipper`: 0.10.11 → 0.12.3
+- `unzipper`: listed as 0.10.11 → 0.12.3, but this upgrade is not in the code: package.json has `^0.10.11` (0.10.14 locked)
 
 **Dev Dependencies (Major Updates):**
 - `mocha`: ^7.2.0 → ^11.7.5 (fixes ReDoS in debug, js-yaml, minimatch)
 - `chai-xml`: ^0.3.2 → ^0.4.1 (fixes xml2js prototype pollution)
 - `got`: ^9.0.0 → ^11.8.6 (downgraded from 14 for test compatibility)
-- `eslint`: ^6.5.1 → ^9.39.1
+- `eslint`: ^6.5.1 → ^8.57.1 (previously listed as ^9.39.1; package.json has ^8.57.1)
 - `grunt-contrib-jasmine`: ^2.2.0 → ^4.0.0
 - `prettier-eslint`: ^11.0.0 → ^16.4.2
 - `prettier-eslint-cli`: ^5.0.0 → ^8.0.1
@@ -284,6 +292,30 @@ Fixes a critical bug where comment protection properties (`locked`, `lockText`) 
 
 Multiple pivot tables support, pivot table count metric, streaming limitations documented.
 
+### 4.4.0-protobi.2 (2025-11-07)
+
+**Added:**
+- Pivot table count metric (upstream PR #2885)
+- 5 bug fixes from upstream PRs
+
+**Fixed:**
+- Boolean XML attribute parsing (#2851)
+- ExcelToDate validation (#2956)
+- DynamicFilter parsing (#2973)
+- WorkbookReader sharedString resolution (#2915)
+- Autofilter undefined guard (#2978)
+
+**Security:**
+- Added package-lock.json
+- Ran npm audit fix (reduced vulnerabilities)
+
+### 4.4.0-protobi.1 (2025-11-06)
+
+**Initial fork release:**
+- Multiple pivot tables from same source
+- XML special character escaping fixes
+- Column width control for pivot tables
+
 ---
 
 ## Status Tracking
@@ -311,8 +343,8 @@ Multiple pivot tables support, pivot table count metric, streaming limitations d
 | Multiple pivot tables support | [#5](https://github.com/protobi/exceljs/issues/5) | [#2995](https://github.com/exceljs/exceljs/pull/2995) | ⏳ Open | Nov 2025 |
 | XML special character escaping | [#3](https://github.com/protobi/exceljs/issues/3) | [#2996](https://github.com/exceljs/exceljs/pull/2996) | ⏳ Open | Nov 2025 |
 | Pivot table column width control | [#8](https://github.com/protobi/exceljs/issues/8) | [#2997](https://github.com/exceljs/exceljs/pull/2997) | ⏳ Open | Nov 2025 |
-| HAN CELL file support | - | [#3017](https://github.com/exceljs/exceljs/pull/3017) | ⏳ Open | Jan 2026 |
-| Data bar conditional formatting defaults | - | [#3018](https://github.com/exceljs/exceljs/pull/3018) | ⏳ Open | Jan 2026 |
+| HAN CELL file support | - | [#3020](https://github.com/exceljs/exceljs/pull/3020) (replaces closed #3017) | ⏳ Open | Jan 2026 |
+| Data bar conditional formatting defaults | - | [#3019](https://github.com/exceljs/exceljs/pull/3019) (replaces closed #3018) | ⏳ Open | Jan 2026 |
 
 **Status:** All original contributions submitted, waiting for upstream review
 
@@ -421,7 +453,7 @@ worksheet3.addPivotTable({ sourceSheet: worksheet1, /* ... */ }); // Works!
 - `lib/doc/pivot-table.js` - Unique cache IDs per pivot table
 - `lib/xlsx/xform/book/workbook-xform.js` - Support multiple cache definitions
 
-**Upstream status:** Ready to submit as PR
+**Upstream status:** Submitted as [#2995](https://github.com/exceljs/exceljs/pull/2995) (open)
 
 ### 2. Pivot Table Count Metric
 
@@ -479,7 +511,7 @@ await workbook.xlsx.writeFile('output.xlsx');
 - `lib/doc/table.js` - Dynamic table reference updates, autoFilterRef handling
 - `lib/doc/worksheet.js` - Table loading compatibility fixes
 
-**Upstream status:** Adopted from [rmartin93/exceljs-fork](https://github.com/rmartin93/exceljs-fork), preparing upstream PR
+**Upstream status:** Adopted from [rmartin93/exceljs-fork](https://github.com/rmartin93/exceljs-fork), submitted as [#2998](https://github.com/exceljs/exceljs/pull/2998) (open)
 
 ### 4. Enhanced Bug Fixes
 
@@ -567,34 +599,6 @@ npm run test:integration -- --grep "Pivot Tables"
 
 ---
 
-## Release History
-
-### 4.4.0-protobi.2 (2025-11-07)
-
-**Added:**
-- Pivot table count metric (upstream PR #2885)
-- 5 bug fixes from upstream PRs
-
-**Fixed:**
-- Boolean XML attribute parsing (#2851)
-- ExcelToDate validation (#2956)
-- DynamicFilter parsing (#2973)
-- WorkbookReader sharedString resolution (#2915)
-- Autofilter undefined guard (#2978)
-
-**Security:**
-- Added package-lock.json
-- Ran npm audit fix (reduced vulnerabilities)
-
-### 4.4.0-protobi.1 (2025-11-06)
-
-**Initial fork release:**
-- Multiple pivot tables from same source
-- XML special character escaping fixes
-- Column width control for pivot tables
-
----
-
 ## Monitoring Upstream
 
 We actively monitor upstream for:
@@ -630,6 +634,6 @@ See [LICENSE](LICENSE)
 
 ---
 
-**Last Updated:** 2025-11-07
-**Watching:** 13 upstream PRs awaiting review/merge
+**Last Updated:** 2026-10-08
+**Watching:** 15 upstream PRs awaiting review/merge
 **Status:** Active maintenance until upstream merge - Continuing to adopt community contributions!

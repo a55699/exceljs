@@ -36,7 +36,7 @@ npm install @protobi/exceljs
 
 ## Migration Path
 
-Once upstream merges our changes (tracking 6 PRs), switch back:
+Once upstream merges our changes (tracking 15 PRs, see [FORK.md](FORK.md#status-tracking)), switch back:
 
 ```bash
 npm install exceljs  # Official package
@@ -50,7 +50,7 @@ See [FORK.md](FORK.md) for detailed tracking of upstream PRs.
 
 ## Security & Maintenance
 
-**Latest Version:** 4.4.0-protobi.9 (Feb 2026)
+**Latest Version:** 4.4.0-protobi.10 (May 2026)
 
 This fork receives active security maintenance:
 -  Dependencies regularly updated
@@ -1684,7 +1684,7 @@ The following properties are supported in the pivot table configuration:
 | values                    | String[]   | Y        | Array of field names to aggregate (currently only 1 value is supported)    |
 | pages                     | String[]   | N        | Array of field names to use as page fields / report filters (must exist in first row) |
 | pageDefaults              | Object     | N        | Default filter values for page fields. Keys are field names, values are the default selections |
-| metric                    | String     | N        | Aggregation function (currently only 'sum' is supported). Default: 'sum'   |
+| metric                    | String     | N        | Aggregation function: 'sum' or 'count'. Default: 'sum'                      |
 | applyWidthHeightFormats   | String     | N        | Controls column width behavior: '1' = apply pivot table style (default), '0' = preserve worksheet column widths |
 
 ### Important Notes
@@ -1692,6 +1692,10 @@ The following properties are supported in the pivot table configuration:
 **Field Names:**
 - Field names must match column headers in the first row of the source sheet exactly
 - Field names are case-sensitive
+
+**Field Values:**
+- Values in row, column and page fields are grouped case-insensitively, as Excel does: "Apple" and "apple" become one item, shown with the first spelling found
+- A `pageDefaults` value must match one of the field's values exactly (case-sensitive); a value that is not found is ignored and the page field shows all items
 
 **Source Data:**
 - The pivot table uses the entire source worksheet data
@@ -1705,12 +1709,12 @@ The following properties are supported in the pivot table configuration:
   - However, `workbook.pivotTables` will be empty - you cannot programmatically access or modify existing pivot tables
   - The generated Excel files work perfectly when opened in Excel with full pivot table functionality
 - **Single value field:** Only one value field is supported per pivot table (`values` array must contain exactly 1 item)
-- **Single metric:** Only the `sum` aggregation metric is currently supported (no count, average, min, max, etc.)
+- **Two metrics:** Only the `sum` and `count` aggregation metrics are supported (no average, min, max, etc.)
 - **Source data requirements:**
   - Source data must have headers in the first row
   - All column headers must be unique
   - The entire source sheet range is used (you cannot specify a partial range)
-- **Placement:** The pivot table will be placed starting at cell A1 on the destination worksheet
+- **Placement:** The pivot table is placed starting at cell A3 on the destination worksheet (rows 1-2 are left for page fields)
 - **No calculated fields:** Custom calculations, calculated fields, or computed columns are not supported
 - **No formatting options:** Pivot table styling and formatting options (besides the default) are not configurable
 
