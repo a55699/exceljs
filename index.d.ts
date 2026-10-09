@@ -1092,6 +1092,125 @@ export interface ConditionalFormattingOptions {
 	rules: ConditionalFormattingRule[];
 }
 
+export interface PivotTableOptions {
+	/**
+	 * Worksheet holding the source data. Row 1 must have a unique,
+	 * non-empty header for every column that holds data.
+	 */
+	sourceSheet: Worksheet;
+	/**
+	 * Header names of the row fields
+	 */
+	rows: string[];
+	/**
+	 * Header names of the column fields
+	 */
+	columns: string[];
+	/**
+	 * Header name of the value field (exactly one is supported)
+	 */
+	values: string[];
+	/**
+	 * Header names of the page fields (report filters)
+	 */
+	pages?: string[];
+	/**
+	 * Default selected item for page fields, keyed by header name
+	 */
+	pageDefaults?: { [fieldName: string]: any };
+	/**
+	 * Summary function of the value field
+	 * @default 'sum'
+	 */
+	metric?: 'sum' | 'count';
+	/**
+	 * '1' applies the pivot table style's column widths, '0' keeps the worksheet's
+	 * @default '1'
+	 */
+	applyWidthHeightFormats?: '0' | '1';
+}
+
+export interface PivotTableCacheField {
+	name: string;
+	sharedItems: any[] | null;
+}
+
+export interface PivotTable {
+	sourceSheet: Worksheet;
+	/**
+	 * Indexes into cacheFields
+	 */
+	rows: number[];
+	columns: number[];
+	values: number[];
+	pages: number[];
+	metric?: 'sum' | 'count';
+	cacheFields: PivotTableCacheField[];
+	cacheId: string;
+	applyWidthHeightFormats: '0' | '1';
+}
+
+export interface FormCheckboxAnchor {
+	/**
+	 * 0-based column
+	 */
+	col: number;
+	/**
+	 * 0-based row
+	 */
+	row: number;
+	colOff?: number;
+	rowOff?: number;
+}
+
+/**
+ * Where to draw a form checkbox: a cell ('B2') or range ('B2:D3'),
+ * 0-based start/end columns and rows, or top-left/bottom-right anchors.
+ */
+export type FormCheckboxRange =
+	| string
+	| {
+			startCol: number;
+			startRow: number;
+			endCol: number;
+			endRow: number;
+			startColOff?: number;
+			startRowOff?: number;
+			endColOff?: number;
+			endRowOff?: number;
+	  }
+	| { tl: string | FormCheckboxAnchor; br?: string | FormCheckboxAnchor };
+
+export interface FormCheckboxOptions {
+	/**
+	 * Label shown next to the checkbox
+	 */
+	text: string;
+	/**
+	 * Cell that receives TRUE/FALSE, e.g. 'A2'
+	 */
+	link: string;
+	checked: boolean;
+	/**
+	 * @default true
+	 */
+	noThreeD: boolean;
+	/**
+	 * @default false
+	 */
+	print: boolean;
+}
+
+export interface FormCheckbox {
+	readonly worksheet: Worksheet;
+	checked: boolean;
+	/**
+	 * Linked cell as an absolute reference, e.g. '$A$2'
+	 */
+	link: string | undefined;
+	text: string;
+}
+
 export interface Worksheet {
 	readonly id: number;
 	name: string;
@@ -1381,6 +1500,22 @@ export interface Worksheet {
 	 * delete conditionalFormattingOptions
 	 */
 	removeConditionalFormatting(filter: any): void;
+
+	/**
+	 * Add a pivot table to this worksheet, built from `options.sourceSheet`.
+	 * Not supported by the streaming WorkbookWriter.
+	 */
+	addPivotTable(options: PivotTableOptions): PivotTable;
+
+	/**
+	 * Add a form control checkbox and return it
+	 */
+	addFormCheckbox(range: FormCheckboxRange, options?: Partial<FormCheckboxOptions>): FormCheckbox;
+
+	/**
+	 * All form control checkboxes in this worksheet
+	 */
+	getFormCheckboxes(): FormCheckbox[];
 }
 
 export interface CalculationProperties {
@@ -1705,7 +1840,29 @@ export interface WorkbookModel {
 	media: Media[];
 }
 
+export interface WorkbookOptions {
+	/**
+	 * Maximum number of custom number formats `addNumberFormat` accepts
+	 * before it throws NumberFormatLimitError
+	 * @default 206
+	 */
+	numFmtLimit: number;
+}
+
+/**
+ * Thrown by Workbook#addNumberFormat when the workbook already holds
+ * `numFmtLimit` custom number formats
+ */
+export class NumberFormatLimitError extends Error {
+	constructor(limit: number, formatCode: string);
+	readonly name: 'NumberFormatLimitError';
+	readonly limit: number;
+	readonly formatCode: string;
+}
+
 export class Workbook {
+	constructor(options?: Partial<WorkbookOptions>);
+
     category: string;
     company: string;
 	creator: string;
@@ -1779,6 +1936,18 @@ export class Workbook {
 	addImage(img: Image): number;
 
 	getImage(id: number): Image;
+
+	/**
+	 * Maximum number of custom number formats `addNumberFormat` accepts
+	 */
+	numFmtLimit: number;
+
+	/**
+	 * Get or create the numFmtId for a format code. Built-in and already used
+	 * codes are always returned; a new custom code beyond `numFmtLimit` throws
+	 * NumberFormatLimitError. Setting `cell.numFmt` does not go through this check.
+	 */
+	addNumberFormat(formatCode: string): number;
 }
 
 export interface TableStyleProperties {
