@@ -64,7 +64,13 @@ _SpecRunner.html
 
 # Ignore xlsx files generated during testing
 *.xlsx
-enpm-lock.yaml
+# ...but keep test fixtures (spec/integration/data has its own .gitignore)
+!test/data/*.xlsx
+!spec/unit/data/*.xlsx
+pnpm-lock.yaml
+
+# output of test/test-checkbox-simple.js
+test-output-dir/
 
 
 # private test space
