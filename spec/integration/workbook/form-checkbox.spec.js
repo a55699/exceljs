@@ -23,6 +23,10 @@ function anchorCells(data) {
   return anchor.filter((value, index) => index % 2 === 0);
 }
 
+function shapeIds(vml) {
+  return [...vml.matchAll(/<v:shape id="([^"]+)"/g)].map(match => match[1]);
+}
+
 function clientData(vml) {
   return vml.match(/<x:ClientData ObjectType="Checkbox">[\s\S]*?<\/x:ClientData>/g) || [];
 }
@@ -120,6 +124,122 @@ describe('Workbook', () => {
       const workbook2 = new ExcelJS.Workbook();
       await workbook2.xlsx.load(buffer);
       expect(workbook2.getWorksheet('Form').getCell('A2').value).to.be.true();
+    });
+
+    it('gives notes and checkboxes on a worksheet different shape ids', async () => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Form');
+      worksheet.getCell('A1').value = 'Noted';
+      worksheet.getCell('A1').note = 'a note';
+      worksheet.addFormCheckbox('B2');
+      worksheet.addFormCheckbox('B4');
+
+      const {zip} = await writeZip(workbook);
+      const vml = await readFile(zip, 'xl/drawings/vmlDrawing1.vml');
+      expect(shapeIds(vml)).to.deep.equal(['_x0000_s1025', '_x0000_s1026', '_x0000_s1027']);
+    });
+
+    describe('loaded from a file', () => {
+      // Saved by Excel: three checkboxes, a button and a note on Form, and
+      // one checkbox on Second
+      const FORM_FILE = './spec/integration/data/form-checkboxes.xlsx';
+      const FORM_CHECKBOXES = [
+        {text: 'Ship & <pay>', link: '$B$5', checked: false, cell: {col: 1, row: 1}},
+        {text: 'Unlinked on', link: undefined, checked: true, cell: {col: 3, row: 1}},
+        {text: 'Off', link: undefined, checked: false, cell: {col: 3, row: 3}},
+      ];
+      const SECOND_CHECKBOXES = [
+        {text: 'Second sheet', link: undefined, checked: true, cell: {col: 2, row: 2}},
+      ];
+
+      function summary(worksheet) {
+        return worksheet.getFormCheckboxes().map(checkbox => ({
+          text: checkbox.text,
+          link: checkbox.link,
+          checked: checkbox.checked,
+          cell: {col: checkbox.model.tl.col, row: checkbox.model.tl.row},
+        }));
+      }
+
+      it('reads the checkboxes saved by Excel', async () => {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(FORM_FILE);
+
+        expect(summary(workbook.getWorksheet('Form'))).to.deep.equal(FORM_CHECKBOXES);
+        expect(summary(workbook.getWorksheet('Second'))).to.deep.equal(SECOND_CHECKBOXES);
+        const [checkbox] = workbook.getWorksheet('Form').getFormCheckboxes();
+        // VML anchors are in pixels
+        expect(checkbox.model.br).to.deep.equal({
+          col: 3,
+          colOff: 5 * 9525,
+          row: 2,
+          rowOff: 4 * 9525,
+        });
+        expect(checkbox.model.noThreeD).to.be.true();
+        expect(checkbox.model.print).to.be.true();
+      });
+
+      it('keeps the note apart from the checkboxes in the same drawing', async () => {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(FORM_FILE);
+
+        const {note} = workbook.getWorksheet('Form').getCell('A8');
+        expect(note.texts[0].text).to.equal('a note');
+        // from the note's own shape, which Excel writes after the controls
+        expect(note.anchor.trim()).to.equal('1, 15, 6, 10, 3, 31, 10, 9');
+      });
+
+      it('writes the loaded checkboxes back', async () => {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(FORM_FILE);
+
+        const {buffer, zip} = await writeZip(workbook);
+        const vml = await readFile(zip, 'xl/drawings/vmlDrawing1.vml');
+        expect(clientData(vml)).to.have.length(3);
+        expect(vml).not.to.include('ObjectType="Button"');
+        expect(new Set(shapeIds(vml)).size).to.equal(4);
+        const rels = await readFile(zip, 'xl/worksheets/_rels/sheet1.xml.rels');
+        expect(ctrlPropTargets(rels)).to.deep.equal([
+          'ctrlProp1.xml',
+          'ctrlProp2.xml',
+          'ctrlProp3.xml',
+        ]);
+
+        const workbook2 = new ExcelJS.Workbook();
+        await workbook2.xlsx.load(buffer);
+        expect(summary(workbook2.getWorksheet('Form'))).to.deep.equal(FORM_CHECKBOXES);
+        expect(summary(workbook2.getWorksheet('Second'))).to.deep.equal(SECOND_CHECKBOXES);
+        expect(workbook2.getWorksheet('Form').getCell('A8').note.texts[0].text).to.equal('a note');
+      });
+
+      it('reads back the checkboxes ExcelJS writes', async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Form');
+        worksheet.addFormCheckbox('B2:D3', {text: 'Accept', link: 'A2', checked: true});
+        const position = {startCol: 5, startRow: 6, endCol: 7, endRow: 7};
+        worksheet.addFormCheckbox(position, {text: 'Flat off', noThreeD: false, print: true});
+        // the part numbers are given when writing
+        const settings = checkbox => {
+          const {ctrlPropId, ctrlPropRelId, ...model} = checkbox.model;
+          return model;
+        };
+        const models = worksheet.getFormCheckboxes().map(settings);
+
+        const {buffer} = await writeZip(workbook);
+        const workbook2 = new ExcelJS.Workbook();
+        await workbook2.xlsx.load(buffer);
+        const loaded = workbook2.getWorksheet('Form').getFormCheckboxes();
+        expect(loaded.map(settings)).to.deep.equal(models);
+
+        loaded[0].checked = false;
+        loaded[1].text = 'Changed';
+        const {buffer: buffer2} = await writeZip(workbook2);
+        const workbook3 = new ExcelJS.Workbook();
+        await workbook3.xlsx.load(buffer2);
+        const reloaded = workbook3.getWorksheet('Form').getFormCheckboxes();
+        expect(reloaded.map(checkbox => checkbox.checked)).to.deep.equal([false, false]);
+        expect(reloaded.map(checkbox => checkbox.text)).to.deep.equal(['Accept', 'Changed']);
+      });
     });
   });
 });
