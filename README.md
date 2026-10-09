@@ -3204,7 +3204,9 @@ touch .disable-test-browser
 
 ## Splice vs Merge[⬆](#contents)<!-- Link generated with jump2header -->
 
-If any splice operation affects a merged cell, the merge group will not be moved correctly
+`spliceRows` moves merged cells and data validations with their rows. A merge that spans the
+splice point keeps its rows outside the removed ones and grows over inserted rows; a merge whose
+rows are all removed is dropped. `spliceColumns` does not move merged cells.
 
 # Release History[⬆](#contents)<!-- Link generated with jump2header -->
 
