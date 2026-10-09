@@ -50,7 +50,7 @@ See [FORK.md](FORK.md) for detailed tracking of upstream PRs.
 
 ## Security & Maintenance
 
-**Latest Version:** 4.4.0-protobi.10 (May 2026)
+**Latest Version:** 4.4.0-protobi.11.a55699.1 (October 2026), tagged in this fork and not published to npm. The latest npm release is 4.4.0-protobi.10 (May 2026).
 
 This fork receives active security maintenance:
 -  Dependencies regularly updated
@@ -60,6 +60,14 @@ This fork receives active security maintenance:
 See [FORK.md Release History](FORK.md#fork-release-history) for details.
 
 ## Fork Release Notes
+
+**4.4.0-protobi.11.a55699.1** (October 2026) - Pivot Table Fixes, Form Controls on Load, Note Fixes
+- Includes 4.4.0-protobi.11 (not yet released by Protobi): `numFmtLimit` and `Workbook#addNumberFormat()` guard against too many number formats
+- **Pivot tables** - Escape XML in names and values, reject empty or duplicate headers, write Excel-compatible value types and counts, much faster on large sources, add pivot tables to loaded workbooks that already have them, and rebuild the cache from the source data when writing
+- **Form controls** - Checkboxes are read when loading (`getFormCheckboxes()`) and other form controls (buttons, drop-downs, spinners...) are kept, so a load + write no longer removes them. A checkbox linked to an empty cell writes its checked state there, since Excel shows the linked cell's value
+- **Notes** - Notes on cells without a value are loaded, and notes loaded without margins no longer get `NaN` margins
+- Prevent prototype pollution in `deepMerge`; `spliceRows` moves merged cells and data validations
+- Typings for pivot tables, form checkboxes and `numFmtLimit`; TypeScript specs and Node 22/24/26 in CI
 
 **4.4.0-protobi.10** (May 2026) - Streaming richText Bug Fix + Build Fix
 - **Fix richText shared-string deduplication in streaming writer** - Cherry-picked from PR #50 by @gwkline. Previously, every richText cell collapsed into a single shared-string entry because objects coerced to `"[object Object]"` as a hash key. Now richText values are hashed by their rendered XML representation. Addresses upstream [exceljs/exceljs#2267](https://github.com/exceljs/exceljs/issues/2267).
