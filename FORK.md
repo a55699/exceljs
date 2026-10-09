@@ -28,7 +28,9 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
-### Unreleased
+### 4.4.0-protobi.11.a55699.2 (2026-10-09)
+
+Tagged `v4.4.0-protobi.11.a55699.2`; package [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). Adds charts and fixes drawings with charts and images. Every change was made on its own branch with tests; the written files were checked in Excel 16.
 
 **Charts**
 
@@ -44,7 +46,7 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ### 4.4.0-protobi.11.a55699.1 (2026-10-08)
 
-First release of the [a55699/exceljs](https://github.com/a55699/exceljs) fork, tagged `v4.4.0-protobi.11.a55699.1` and published to npm as [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). It is 4.4.0-protobi.11, which Protobi has not released yet, plus the changes below. Every change was made on its own branch with tests; changes to the written XML were checked by opening the files in Excel 16.
+First release of the [a55699/exceljs](https://github.com/a55699/exceljs) fork, tagged `v4.4.0-protobi.11.a55699.1`, with the package renamed to `@a55699/exceljs`. It is 4.4.0-protobi.11, which Protobi has not released yet, plus the changes below. Every change was made on its own branch with tests; changes to the written XML were checked by opening the files in Excel 16.
 
 **Package**
 
