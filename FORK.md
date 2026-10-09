@@ -28,6 +28,20 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
+### Unreleased
+
+**Charts**
+
+- `worksheet.addChart()` adds bar (vertical or horizontal; clustered, stacked or percent stacked), line, area, pie, doughnut and scatter charts drawn from cell ranges, placed over a range like images; see README "Charts". Series come from `{sheet, ref}` references, formula strings or a data range; titles, axis titles, min/max, number format, gridlines and legend position can be set
+- The file keeps the series values next to the references, as Excel does, taken from the cells when the workbook is written
+- Charts are drawn in the worksheet's drawing with images and with the charts, shapes and pictures of a loaded file
+
+**Fixes**
+
+- Adding an image to a loaded workbook with a chart wrote a file Excel could not open (on the same worksheet or on another one). Charts, shapes and other drawing anchors of a loaded file are now kept one by one, so images and new charts can be added next to them
+- A loaded workbook with a text box drawn over a chart (chart shapes) could not be opened after it was written again
+- The same image added to two worksheets in a row lost its relationship on the second worksheet (protobi/exceljs#24)
+
 ### 4.4.0-protobi.11.a55699.1 (2026-10-08)
 
 First release of the [a55699/exceljs](https://github.com/a55699/exceljs) fork, tagged `v4.4.0-protobi.11.a55699.1` and published to npm as [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). It is 4.4.0-protobi.11, which Protobi has not released yet, plus the changes below. Every change was made on its own branch with tests; changes to the written XML were checked by opening the files in Excel 16.
