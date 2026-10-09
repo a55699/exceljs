@@ -233,6 +233,18 @@ To be clear, all contributions added to this library will be included in the lib
       <li><a href="#conditional-formatting">Conditional Formatting</a></li>
       <li><a href="#outline-levels">Outline Levels</a></li>
       <li><a href="#images">Images</a></li>
+      <li><a href="#charts">Charts</a>
+        <ul>
+          <li><a href="#add-a-chart">Add a Chart</a></li>
+          <li><a href="#series-from-a-range">Series From a Range</a></li>
+          <li><a href="#chart-types">Chart Types</a></li>
+          <li><a href="#series">Series</a></li>
+          <li><a href="#chart-position">Chart Position</a></li>
+          <li><a href="#chart-properties">Chart Properties</a></li>
+          <li><a href="#accessing-charts">Accessing Charts</a></li>
+          <li><a href="#chart-notes">Chart Notes</a></li>
+        </ul>
+      </li>
       <li><a href="#sheet-protection">Sheet Protection</a></li>
       <li><a href="#file-io">File I/O</a>
         <ul>
@@ -2428,6 +2440,179 @@ worksheet.addImage(imageId2, {
   }
 });
 ```
+
+## Charts[⬆](#contents)<!-- Link generated with jump2header -->
+
+Charts are added with `worksheet.addChart()` (not available in 4.4.0-protobi.11.a55699.1 and earlier). Charts are drawn from cell ranges, so Excel updates them when the cells change. A chart is placed over a cell range like an image.
+
+### Add a Chart[⬆](#contents)<!-- Link generated with jump2header -->
+
+```javascript
+const ExcelJS = require('@a55699/exceljs');
+const workbook = new ExcelJS.Workbook();
+const worksheet = workbook.addWorksheet('Sales Data');
+worksheet.addRows([
+  ['Month', 'East', 'West'],
+  ['Jan', 10, 30],
+  ['Feb', 40, 60],
+  ['Mar', 50, 70],
+  ['Apr', 20, 10],
+]);
+
+const chart = worksheet.addChart({
+  type: 'bar',
+  title: 'Sales by month',
+  series: [
+    {
+      name: {sheet: worksheet, ref: 'B1'},
+      categories: {sheet: worksheet, ref: 'A2:A5'},
+      values: {sheet: worksheet, ref: 'B2:B5'},
+    },
+    {
+      name: {sheet: worksheet, ref: 'C1'},
+      categories: {sheet: worksheet, ref: 'A2:A5'},
+      values: {sheet: worksheet, ref: 'C2:C5'},
+    },
+  ],
+  axes: {
+    x: {title: 'Month'},
+    y: {title: 'Units'},
+  },
+  range: 'E2:L17',
+});
+
+await workbook.xlsx.writeFile('sales.xlsx');
+```
+
+### Series From a Range[⬆](#contents)<!-- Link generated with jump2header -->
+
+Instead of listing every series, use `data` to make one series per column (or per row) of a range. This chart is the same as the one above:
+
+```javascript
+worksheet.addChart({
+  type: 'bar',
+  title: 'Sales by month',
+  data: {sheet: worksheet, ref: 'A1:C5'},
+  axes: {x: {title: 'Month'}, y: {title: 'Units'}},
+  range: 'E2:L17',
+});
+```
+
+With the default options, the first row holds the series names and the first column holds the categories; each other column is one series. For a scatter chart, the first column holds the X values instead of the categories.
+
+| Property           | Type                | Default     | Description |
+| ------------------ | ------------------- | ----------- | ----------- |
+| sheet              | Worksheet \| String | (required)  | The worksheet (or its name) holding the data |
+| ref                | String              | (required)  | The range, e.g. `'A1:C5'` |
+| seriesIn           | String              | `'columns'` | `'columns'`: each column is a series. `'rows'`: each row is a series |
+| titlesFromData     | Boolean             | `true`      | The first row (or first column, with `seriesIn: 'rows'`) holds the series names |
+| categoriesFromData | Boolean             | `true`      | The first column (or first row, with `seriesIn: 'rows'`) holds the categories |
+
+### Chart Types[⬆](#contents)<!-- Link generated with jump2header -->
+
+| type         | Options | Series data |
+| ------------ | ------- | ----------- |
+| `'bar'`      | `direction`: `'col'` (vertical, default) or `'bar'` (horizontal); `grouping`: `'clustered'` (default), `'stacked'` or `'percentStacked'` | `categories`, `values` |
+| `'line'`     | `grouping`: `'standard'` (default), `'stacked'` or `'percentStacked'`; `markers`: Boolean (default `true`) | `categories`, `values` |
+| `'area'`     | `grouping`: `'standard'` (default), `'stacked'` or `'percentStacked'` | `categories`, `values` |
+| `'pie'`      | Uses the first series only | `categories`, `values` |
+| `'doughnut'` | `holeSize`: 10 to 90 (percent of the size, default 50) | `categories`, `values` |
+| `'scatter'`  | `lines`: Boolean, draw lines between the points (default `false`) | `xValues`, `yValues` |
+
+```javascript
+// stacked horizontal bars
+worksheet.addChart({
+  type: 'bar',
+  direction: 'bar',
+  grouping: 'stacked',
+  data: {sheet: worksheet, ref: 'A1:C5'},
+  range: 'E2:L17',
+});
+
+// scatter: West against East
+worksheet.addChart({
+  type: 'scatter',
+  title: 'East vs West',
+  series: [
+    {
+      name: 'West by East',
+      xValues: {sheet: worksheet, ref: 'B2:B5'},
+      yValues: {sheet: worksheet, ref: 'C2:C5'},
+    },
+  ],
+  axes: {x: {title: 'East'}, y: {title: 'West'}},
+  range: 'E20:L35',
+});
+```
+
+### Series[⬆](#contents)<!-- Link generated with jump2header -->
+
+| Property   | Type               | Description |
+| ---------- | ------------------ | ----------- |
+| name       | String \| ChartRef | The series name shown in the legend: a text, or a reference to the cell holding it |
+| categories | ChartRef           | The category labels (bar, line, area, pie, doughnut) |
+| values     | ChartRef           | The values (bar, line, area, pie, doughnut) |
+| xValues    | ChartRef           | The X values (scatter) |
+| yValues    | ChartRef           | The Y values (scatter) |
+
+A `ChartRef` is either `{sheet, ref}`, where `sheet` is a worksheet or its name and `ref` is a cell or range like `'B2:B5'`, or a formula string like `"'Sales Data'!$B$2:$B$5"`. In the `{sheet, ref}` form the sheet name is quoted for you.
+
+Each range must be a single row or a single column, and the ranges of a series must have the same number of cells.
+
+### Chart Position[⬆](#contents)<!-- Link generated with jump2header -->
+
+`range` takes the same forms as for [images](#images):
+
+```javascript
+const data = {sheet: worksheet, ref: 'A1:C5'};
+
+// cover a cell range
+worksheet.addChart({type: 'line', data, range: 'E2:L17'});
+
+// from one cell corner to another, with 0-based col and row
+worksheet.addChart({type: 'line', data, range: {tl: {col: 4, row: 1}, br: {col: 12, row: 17}}});
+
+// at a cell, with a size in pixels at 96dpi
+worksheet.addChart({type: 'line', data, range: {tl: {col: 4, row: 1}, ext: {width: 480, height: 288}}});
+```
+
+### Chart Properties[⬆](#contents)<!-- Link generated with jump2header -->
+
+| Property | Type             | Required | Description |
+| -------- | ---------------- | -------- | ----------- |
+| type     | String           | Y        | `'bar'`, `'line'`, `'area'`, `'pie'`, `'doughnut'` or `'scatter'` |
+| series   | Object[]         | `series` or `data` | The series, see [Series](#series) |
+| data     | Object           | `series` or `data` | Make the series from a range, see [Series From a Range](#series-from-a-range) |
+| range    | String \| Object | Y        | Where to place the chart, see [Chart Position](#chart-position) |
+| title    | String           | N        | The chart title. Use `\n` for a new line |
+| axes     | Object           | N        | `x` and `y` axis options: `title` (String), `min` and `max` (Number), `numFmt` (String, e.g. `'#,##0'`), `gridlines` (Boolean; default `true` for `y` and `false` for `x`). `x` is the category axis (the X values of a scatter chart) and `y` the value axis, also for horizontal bars. Pie and doughnut charts have no axes |
+| legend   | Object \| false  | N        | `{position}`, where position is `'r'` (default), `'l'`, `'t'`, `'b'` or `'tr'`; `false` hides the legend |
+| name     | String           | N        | The chart name shown in Excel's Selection Pane. Default: `'Chart 1'`, `'Chart 2'`... |
+
+The options of each type (`direction`, `grouping`, `markers`, `holeSize`, `lines`) are listed in [Chart Types](#chart-types).
+
+`addChart` checks the options and throws an error for an unknown type, a chart without series, a malformed range or a worksheet that does not exist, so mistakes are found before the workbook is written.
+
+### Accessing Charts[⬆](#contents)<!-- Link generated with jump2header -->
+
+```javascript
+const chart = worksheet.addChart({type: 'bar', data: {sheet: worksheet, ref: 'A1:C5'}, range: 'E2:L17'});
+
+// the charts added to this worksheet with addChart
+worksheet.getCharts(); // [chart]
+
+// change a chart before writing
+chart.title = 'Sales by month (units)';
+```
+
+### Chart Notes[⬆](#contents)<!-- Link generated with jump2header -->
+
+- **Values are read when writing:** next to the cell references, the file keeps a copy of the series values and labels, as Excel does, so viewers that do not recalculate can show the chart. The copy is taken from the cells when the workbook is written, so the cells can still change after `addChart`.
+- **Text and number categories:** categories are written as text or as numbers, following the cell values.
+- **Charts with images:** charts and images on the same worksheet are written to the same drawing.
+- **Loaded charts:** charts in a workbook you load are kept as they are when you write it back. They are not returned by `getCharts()` and cannot be changed yet.
+- **Streaming not supported:** as for images, charts are not supported by the streaming `WorkbookWriter`.
+- **Not supported yet:** colors and other formatting of series, data labels, secondary axes, combined charts (for example bar with line), 3D charts, newer chart types (waterfall, treemap, funnel...), chart sheets and pivot charts.
 
 ## Sheet Protection[⬆](#contents)<!-- Link generated with jump2header -->
 
