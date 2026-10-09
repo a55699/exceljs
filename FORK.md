@@ -42,6 +42,7 @@ This AI-assisted workflow enables rapid response to community issues while maint
 - Changing a header cell renames the column and the references to it; before, the file could not be opened
 - Files Excel could not open are no longer written: a table without rows gets one empty row; a column named with a number is written as text; column names with `[`, `]`, `#` or `'` are escaped in the totals formulas; two columns with the same name or two tables sharing cells throw an error
 - The filters of a loaded table are kept (they were lost while the filtered rows stayed hidden, and a Top 10, colour or icon filter made loading fail). A pivot table made from a loaded table follows its rename or removal
+- The streaming `WorkbookWriter` writes tables: `worksheet.addTable()` works as for a workbook, before the rows of the table are committed
 
 **Fixes**
 

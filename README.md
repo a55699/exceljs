@@ -3027,6 +3027,20 @@ worksheet.getCell('C2').value = 'Neither am I';
 worksheet.getRow(2).commit(); // now rows 1 and two are committed.
 ```
 
+Tables can be added the same way, before their rows are committed: `addTable`
+writes the header, rows and totals of the table into the worksheet's rows (see
+[Tables](#tables)).
+
+```javascript
+worksheet.addTable({
+  name: 'Sales',
+  ref: 'A1',
+  columns: [{name: 'Month'}, {name: 'Amount'}],
+  rows: [['Jan', 10], ['Feb', 20]],
+});
+worksheet.commit();
+```
+
 As each worksheet is completed, it must also be committed:
 
 ```javascript
