@@ -28,6 +28,17 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
+### Unreleased
+
+**Tables**
+
+- A workbook with a table could not be opened in Excel after it was loaded and written again, even without changes: the rows of a loaded table were not read, so the table was written with only its header row (in 4.4.0, as a table without a header row). The rows are now read from the cells, and the calculated column formulas, a custom totals formula, the totals row and a table without a header row or without filter buttons are kept
+- `addRow`, `removeRows`, `addColumn`, `removeColumns`, renaming and changing the theme work on the tables of a loaded file. The formulas of rows that move move with them, and a new row gets the formula of each calculated column
+- Renaming a table or a column renames the references to it in the formulas of the workbook (`Sales[Qty]` becomes `Orders[Qty]`), as Excel does
+- `removeTable` works like Excel's Convert to Range: the formulas that refer to the table get cell references (`SUM(Sales[Qty])` becomes `SUM(Data!$B$2:$B$4)`, `[@Qty]` becomes `Data!$B2`); they turned into `#REF!` before
+- `addTable` and renaming throw an error for a table name Excel cannot open (with a space, like `T1` or `R1C1`) or used by another table of the workbook
+- Fixed: `table.theme` did not change the style, `displayName` could not be set, a table without a header row could not be opened, a function in the totals row of the first column was replaced by the label, and a filter button hidden on one column was hidden on another after loading
+
 ### 4.4.0-protobi.11.a55699.2 (2026-10-09)
 
 Tagged `v4.4.0-protobi.11.a55699.2`; package [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). Adds charts and fixes drawings with charts and images. Every change was made on its own branch with tests; the written files were checked in Excel 16.

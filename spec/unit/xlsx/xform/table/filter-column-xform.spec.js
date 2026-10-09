@@ -12,7 +12,7 @@ const expectations = [
     preparedModel: {colId: '0', filterButton: true},
     xml: '<filterColumn colId="0" hiddenButton="0" />',
     get parsedModel() {
-      return this.initialModel;
+      return this.preparedModel;
     },
     tests: ['prepare', 'render', 'renderIn', 'parse'],
     options: {index: 0},
@@ -26,7 +26,7 @@ const expectations = [
     preparedModel: {colId: '1', filterButton: false},
     xml: '<filterColumn colId="1" hiddenButton="1" />',
     get parsedModel() {
-      return this.initialModel;
+      return this.preparedModel;
     },
     tests: ['prepare', 'render', 'renderIn', 'parse'],
     options: {index: 1},
@@ -45,10 +45,19 @@ const expectations = [
     xml:
       '<filterColumn colId="0" hiddenButton="1"><customFilters><customFilter val="*brandywine*"/></customFilters></filterColumn>',
     get parsedModel() {
-      return this.initialModel;
+      return this.preparedModel;
     },
     tests: ['prepare', 'render', 'renderIn', 'parse'],
     options: {index: 0},
+  },
+  {
+    title: 'button shown when hiddenButton is not written',
+    create() {
+      return new FilterColumnXform();
+    },
+    xml: '<filterColumn colId="2" />',
+    parsedModel: {colId: '2', filterButton: true},
+    tests: ['parse'],
   },
 ];
 

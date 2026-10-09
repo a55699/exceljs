@@ -23,6 +23,49 @@ const expectations = [
     parsedModel: {name: 'Foo', totalsRowFunction: 'Baz'},
     tests: ['render', 'renderIn', 'parse'],
   },
+  {
+    title: 'calculated column',
+    create() {
+      return new TableColumnXform();
+    },
+    preparedModel: {
+      id: 2,
+      name: 'Total',
+      calculatedColumnFormula: 'Sales[[#This Row],[Qty]]*2',
+    },
+    xml: '<tableColumn id="2" name="Total"><calculatedColumnFormula>Sales[[#This Row],[Qty]]*2</calculatedColumnFormula></tableColumn>',
+    parsedModel: {name: 'Total', calculatedColumnFormula: 'Sales[[#This Row],[Qty]]*2'},
+    tests: ['render', 'renderIn', 'parse'],
+  },
+  {
+    title: 'custom total',
+    create() {
+      return new TableColumnXform();
+    },
+    preparedModel: {
+      id: 1,
+      name: 'Qty',
+      totalsRowFunction: 'custom',
+      totalsRowFormula: 'SUM(Sales[Qty])*2',
+    },
+    xml: '<tableColumn id="1" name="Qty" totalsRowFunction="custom"><totalsRowFormula>SUM(Sales[Qty])*2</totalsRowFormula></tableColumn>',
+    parsedModel: {name: 'Qty', totalsRowFunction: 'custom', totalsRowFormula: 'SUM(Sales[Qty])*2'},
+    tests: ['render', 'renderIn', 'parse'],
+  },
+  {
+    title: 'formula of a total that is not custom is not written',
+    create() {
+      return new TableColumnXform();
+    },
+    preparedModel: {
+      id: 1,
+      name: 'Qty',
+      totalsRowFunction: 'sum',
+      totalsRowFormula: 'SUBTOTAL(109,Sales[Qty])',
+    },
+    xml: '<tableColumn id="1" name="Qty" totalsRowFunction="sum" />',
+    tests: ['render', 'renderIn'],
+  },
 ];
 
 describe('TableColumnXform', () => {

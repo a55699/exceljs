@@ -1389,8 +1389,8 @@ The following table defines the properties supported by tables.
 
 | Table Property | Description       | Required | Default Value |
 | -------------- | ----------------- | -------- | ------------- |
-| name           | The name of the table | Y |    |
-| displayName    | The display name of the table | N | name |
+| name           | The name of the table, used in formulas like `MyTable[Amount]`. It must be unique in the workbook, start with a letter, `_` or `\`, have no spaces and not look like a cell reference (`A1`, `R1C1`); `addTable` throws an error otherwise | Y |    |
+| displayName    | The display name of the table; Excel keeps it the same as name | N | name |
 | ref            | Top left cell of the table | Y |   |
 | headerRow      | Show headers at top of table | N | true |
 | totalsRow      | Show totals at bottom of table | N | false |
@@ -1420,9 +1420,10 @@ column.
 | ------------------ | ----------------- | -------- | ------------- |
 | name               | The name of the column, also used in the header | Y |    |
 | filterButton       | Switches the filter control in the header | N |  false  |
-| totalsRowLabel     | Label to describe the totals row (first column) | N | 'Total' |
+| totalsRowLabel     | Label shown in the totals row when the column has no totals function | N | 'Total' for the first column |
 | totalsRowFunction  | Name of the totals function | N | 'none' |
 | totalsRowFormula   | Optional formula for custom functions | N |   |
+| calculatedColumnFormula | Formula of a calculated column, like `MyTable[[#This Row],[Amount]]*2`. A row added without a value for the column gets the formula, as in Excel | N |   |
 
 ### Totals Functions[⬆](#contents)<!-- Link generated with jump2header -->
 
@@ -1470,6 +1471,9 @@ once complete.
 All index values in the table are zero based, so the first row number
 and first column number is 0.
 
+The tables of a loaded file can be changed in the same way: their rows are
+read from the cells of the worksheet.
+
 **Adding or Removing Headers and Totals**
 
 ```javascript
@@ -1515,6 +1519,12 @@ table.addRow([new Date('2019-08-10'), 10, 'End']);
 table.commit();
 ```
 
+`addRow` and `removeRows` write the table into the sheet themselves. The
+rows below the changed row move up or down, and their formulas move with them
+(`B3*2` becomes `B2*2` when the row moves up). A new row gets the formula of
+each calculated column it has no value for. Cells below the table are not
+moved: a table that grows writes over them.
+
 **Adding and Removing Columns**
 
 ```javascript
@@ -1554,6 +1564,34 @@ column.totalsRowResult = 10;
 // commit the table changes into the sheet
 table.commit();
 ```
+
+Renaming a column renames the references to it in the formulas of the
+workbook, so `MyTable[Amount]` becomes `MyTable[Code]`.
+
+**Renaming a Table and Changing its Theme**
+
+```javascript
+const table = ws.getTable('MyTable');
+
+// the formulas of the workbook that refer to MyTable now refer to Sales
+table.name = 'Sales';
+table.theme = 'TableStyleLight9';
+table.commit();
+
+// the table is now found by its new name
+ws.getTable('Sales');
+```
+
+**Removing a Table**
+
+```javascript
+ws.removeTable('Sales');
+```
+
+As with "Convert to Range" in Excel, the cells of the table stay and the
+formulas that refer to the table get cell references: `SUM(Sales[Amount])`
+becomes `SUM(Sheet1!$B$2:$B$4)`, and `[@Amount]` in a row becomes
+`Sheet1!$B2`.
 
 
 ## Pivot Tables[⬆](#contents)<!-- Link generated with jump2header -->
