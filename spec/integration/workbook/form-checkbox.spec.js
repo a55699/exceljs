@@ -265,8 +265,9 @@ describe('Workbook', () => {
         const {buffer, zip} = await writeZip(workbook);
         const vml = await readFile(zip, 'xl/drawings/vmlDrawing1.vml');
         expect(clientData(vml)).to.have.length(3);
-        expect(vml).not.to.include('ObjectType="Button"');
-        expect(new Set(shapeIds(vml)).size).to.equal(4);
+        // the button is kept as read (form-controls-preserve.spec.js)
+        expect(vml).to.include('ObjectType="Button"');
+        expect(new Set(shapeIds(vml)).size).to.equal(5);
         const rels = await readFile(zip, 'xl/worksheets/_rels/sheet1.xml.rels');
         expect(ctrlPropTargets(rels)).to.deep.equal([
           'ctrlProp1.xml',
