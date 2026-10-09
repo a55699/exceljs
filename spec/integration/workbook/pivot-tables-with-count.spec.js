@@ -74,5 +74,92 @@ describe('Workbook', () => {
         }
       });
     });
+
+    it('if metric is count, then dataField uses count subtotal', async () => {
+      const workbook = new ExcelJS.Workbook();
+
+      const worksheet1 = workbook.addWorksheet('Sheet1');
+      worksheet1.addRows(TEST_DATA);
+
+      const worksheet2 = workbook.addWorksheet('Sheet2');
+      worksheet2.addPivotTable({
+        sourceSheet: worksheet1,
+        rows: ['A', 'B'],
+        columns: ['C'],
+        values: ['E'],
+        metric: 'count',
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const zip = await JSZip.loadAsync(buffer);
+      const xml = await zip.file('xl/pivotTables/pivotTable1.xml').async('string');
+      expect(xml).to.include('name="Count of E"');
+      expect(xml).to.include('subtotal="count"');
+      expect(xml).to.not.include('Sum of E');
+    });
+
+    it('if metric is sum, then dataField has no count subtotal', async () => {
+      const workbook = new ExcelJS.Workbook();
+
+      const worksheet1 = workbook.addWorksheet('Sheet1');
+      worksheet1.addRows(TEST_DATA);
+
+      const worksheet2 = workbook.addWorksheet('Sheet2');
+      worksheet2.addPivotTable({
+        sourceSheet: worksheet1,
+        rows: ['A', 'B'],
+        columns: ['C'],
+        values: ['E'],
+        metric: 'sum',
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const zip = await JSZip.loadAsync(buffer);
+      const xml = await zip.file('xl/pivotTables/pivotTable1.xml').async('string');
+      expect(xml).to.include('name="Sum of E"');
+      expect(xml).to.not.include('subtotal="count"');
+    });
+
+    it('if metric is count, then written workbook can be loaded back', async () => {
+      const workbook = new ExcelJS.Workbook();
+
+      const worksheet1 = workbook.addWorksheet('Sheet1');
+      worksheet1.addRows(TEST_DATA);
+
+      const worksheet2 = workbook.addWorksheet('Sheet2');
+      worksheet2.addPivotTable({
+        sourceSheet: worksheet1,
+        rows: ['A', 'B'],
+        columns: ['C'],
+        values: ['E'],
+        metric: 'count',
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const workbook2 = new ExcelJS.Workbook();
+      await workbook2.xlsx.load(buffer);
+      expect(workbook2.getWorksheet('Sheet1').getCell('E7').value).to.equal(45);
+      expect(workbook2.getWorksheet('Sheet2')).to.not.be.undefined();
+    });
+
+    it('if metric is unsupported, then addPivotTable throws', () => {
+      const workbook = new ExcelJS.Workbook();
+
+      const worksheet1 = workbook.addWorksheet('Sheet1');
+      worksheet1.addRows(TEST_DATA);
+
+      const worksheet2 = workbook.addWorksheet('Sheet2');
+      const addPivotTable = () => {
+        worksheet2.addPivotTable({
+          sourceSheet: worksheet1,
+          rows: ['A', 'B'],
+          columns: ['C'],
+          values: ['E'],
+          metric: 'average',
+        });
+      };
+      const message = 'Only the "sum" and "count" metric is supported at this time.';
+      expect(addPivotTable).to.throw(message);
+    });
   });
 });
