@@ -76,4 +76,25 @@ describe('under-dash', () => {
       }
     });
   });
+
+  describe('deepMerge', () => {
+    afterEach(() => {
+      delete Object.prototype.polluted; // eslint-disable-line no-extend-native
+    });
+
+    it('merges nested objects', () => {
+      const result = _.deepMerge({}, {a: {b: 1}}, {a: {c: 2}});
+      expect(result).to.deep.equal({a: {b: 1, c: 2}});
+    });
+
+    it('does not pollute Object.prototype via __proto__', () => {
+      _.deepMerge({}, JSON.parse('{"__proto__": {"polluted": "yes"}}'));
+      expect({}.polluted).to.be.undefined();
+    });
+
+    it('does not pollute Object.prototype via constructor.prototype', () => {
+      _.deepMerge({}, JSON.parse('{"constructor": {"prototype": {"polluted": "yes"}}}'));
+      expect({}.polluted).to.be.undefined();
+    });
+  });
 });
