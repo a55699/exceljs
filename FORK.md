@@ -43,6 +43,10 @@ This AI-assisted workflow enables rapid response to community issues while maint
 - Files Excel could not open are no longer written: a table without rows gets one empty row; a column named with a number is written as text; column names with `[`, `]`, `#` or `'` are escaped in the totals formulas; two columns with the same name or two tables sharing cells throw an error
 - The filters of a loaded table are kept (they were lost while the filtered rows stayed hidden, and a Top 10, colour or icon filter made loading fail). A pivot table made from a loaded table follows its rename or removal
 
+**Fixes**
+
+- `spliceRows`, `insertRow(s)`, `duplicateRow` and `spliceColumns` broke shared formulas (a formula filled down, as Excel saves it): inserting or deleting rows or columns at or above them threw "Shared Formula master must exist above and or left of clone", or wrote a file Excel could not open. The shared formulas they move become a formula in each cell, and the range of a moved array formula moves with it
+
 ### 4.4.0-protobi.11.a55699.2 (2026-10-09)
 
 Tagged `v4.4.0-protobi.11.a55699.2`; package [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). Adds charts and fixes drawings with charts and images. Every change was made on its own branch with tests; the written files were checked in Excel 16.
