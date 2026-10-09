@@ -73,6 +73,15 @@ describe('WorkbookWriter', () => {
       expect(await zip.file('xl/tables/table1.xml').async('string')).to.include('name="Plain"');
     });
 
+    it('checks the table names as a workbook does', () => {
+      const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({});
+      const table = name => ({name, ref: 'A1', columns: [{name: 'a'}], rows: [[1]]});
+      expect(() => workbook.addWorksheet('One').addTable(table('T1'))).to.throw(/is not valid/);
+      workbook.getWorksheet('One').addTable(table('Sales'));
+      expect(workbook.worksheets.map(worksheet => worksheet.name)).to.deep.equal(['One']);
+      expect(() => workbook.addWorksheet('Two').addTable(table('SALES'))).to.throw(/already used/);
+    });
+
     it('cannot add a table on rows already committed', () => {
       const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({});
       const worksheet = workbook.addWorksheet('Data');

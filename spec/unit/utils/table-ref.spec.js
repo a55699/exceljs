@@ -64,6 +64,10 @@ describe('table-ref', () => {
       ).to.equal('#REF!');
     });
 
+    it('gives #REF! for the current row of a formula without a row', () => {
+      expect(convert('Sales[@Qty]')).to.equal('#REF!');
+    });
+
     it('quotes the sheet name when needed', () => {
       expect(
         mapTableReferences('SUM(Sales[Qty])', 'Sales', false, spec =>

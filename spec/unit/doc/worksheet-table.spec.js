@@ -431,6 +431,27 @@ describe('Worksheet', () => {
       expect(ws.getCell('F1').value.formula).to.equal('SUM(#REF!)+COUNTA(Sales[Month])');
     });
 
+    it('changes the defined names that refer to the table', () => {
+      const wb = new Excel.Workbook();
+      const ws = wb.addWorksheet('blort');
+      const table = addSales(ws);
+      wb.definedNames.model = [
+        {name: 'TotalQty', ranges: [], formula: 'SUM(Sales[Qty])'},
+        {name: 'Months', ranges: [], formula: 'COUNTA(Sales[Month])'},
+      ];
+      const formulas = () => wb.definedNames.model.map(definedName => definedName.formula);
+
+      table.name = 'Orders';
+      expect(formulas()).to.deep.equal(['SUM(Orders[Qty])', 'COUNTA(Orders[Month])']);
+
+      table.removeColumns(0);
+      table.commit();
+      expect(formulas()).to.deep.equal(['SUM(Orders[Qty])', 'COUNTA(#REF!)']);
+
+      ws.removeTable('Orders');
+      expect(formulas()).to.deep.equal(['SUM(blort!$A$2:$A$3)', 'COUNTA(#REF!)']);
+    });
+
     describe('when worksheet rows and columns are spliced', () => {
       // Sales on B2:D6: header, three data rows, totals row; the expected
       // ranges are what Excel gives for the same changes
