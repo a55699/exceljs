@@ -28,6 +28,12 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
+### Unreleased
+
+**Tables**
+
+- The streaming `WorkbookWriter` writes tables: `worksheet.addTable()` works as for a workbook, before the rows of the table are committed
+
 ### 4.4.0-protobi.11.a55699.2 (2026-10-09)
 
 Tagged `v4.4.0-protobi.11.a55699.2`; package [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). Adds charts and fixes drawings with charts and images. Every change was made on its own branch with tests; the written files were checked in Excel 16.
