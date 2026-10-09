@@ -28,13 +28,54 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ## Fork Release History
 
-### 4.4.0-protobi.11 (unreleased)
+### 4.4.0-protobi.11.a55699.1 (2026-10-08)
 
-`package.json` is at this version; it has not been tagged or published yet.
+Tagged in the [a55699/exceljs](https://github.com/a55699/exceljs) fork as `v4.4.0-protobi.11.a55699.1`; not published to npm (the latest npm release is 4.4.0-protobi.10). It is 4.4.0-protobi.11, which Protobi has not released yet, plus the changes below. Every change was made on its own branch with tests; changes to the written XML were checked by opening the files in Excel 16.
+
+**Included from 4.4.0-protobi.11**
 
 - **Number format limit guard** (Protobi [#83](https://github.com/protobi/exceljs/issues/83))
   - New workbook option `numFmtLimit` (default 206) and `Workbook#addNumberFormat(formatCode)`, which returns the numFmtId and throws `NumberFormatLimitError` once the workbook holds `numFmtLimit` custom formats
   - Opt-in: setting `cell.numFmt` directly does not go through this check
+
+**Pivot tables**
+
+- Escape `&`, `<`, `>` and quotes in field names and text values; reject empty or duplicate (case-insensitive) header names, which Excel cannot open
+- Write cell values as Excel does: formulas by their result, rich text and hyperlinks by their text, dates as date items, numbers and booleans by type, with the `sharedItems` attributes Excel expects for mixed columns
+- Write correct record, item and field counts, including empty columns and page fields without items
+- Much faster on large sources (200,000 rows: from not finishing to about 5 seconds)
+- Adding a pivot table to a loaded workbook that already has pivot tables: number the new parts and cache ids after the loaded ones and keep the loaded relationships
+- Rebuild the pivot cache from the source sheet when writing, so data changed after `addPivotTable()` is used instead of failing
+
+**Form controls and notes**
+
+- Form checkboxes are read when a workbook is loaded (`getFormCheckboxes()`), so a load + write keeps them
+- Other form controls (buttons, drop-downs, list boxes, spinners, option buttons, group boxes...) are kept as read when a workbook is loaded and written
+- A checkbox linked to an empty cell writes its checked state to that cell, since Excel shows the state of the linked cell; setting `checked` also sets the linked cell. Cells that already hold a value are not changed
+- Notes and checkboxes on the same worksheet get different shape ids
+- Notes on cells without a value are loaded (they were dropped)
+- Notes loaded without margins are written with the default margins (were `NaNmm`)
+
+**Other fixes**
+
+- `deepMerge` ignores `__proto__`, `constructor` and `prototype` keys (prototype pollution through crafted note data)
+- `spliceRows` moves merged cells and data validations with their rows
+
+**TypeScript, tests and tooling**
+
+- Typings for pivot tables, form checkboxes, `numFmtLimit`, `addNumberFormat` and `NumberFormatLimitError`
+- The TypeScript specs run in CI; the failing stream spec is fixed
+- CI runs on Node 22, 24 and 26 with `npm ci`; actions pinned by commit; `engines` set to `>=14.14.0`
+- prettier and eslint no longer disagree in the pre-commit hook; `npm ci` works without `--legacy-peer-deps`
+- Lockfile refreshed for `tmp`, `minimatch` and `brace-expansion`
+- `.gitattributes` normalizes line endings to LF; `test-output-dir/` is no longer tracked
+- New tests for the pivot count metric (#2885), pivot grouping, multiple pivots and page fields, and form checkbox output
+
+**Known limitations**
+
+- `spliceColumns` still does not move merged cells
+- A note whose text is a single run without a font loads as a plain string, so custom margins on it are not kept
+- Button macros are not stored in .xlsx files, so a kept button's macro reference does not resolve
 
 ### 4.4.0-protobi.10 (2026-05-06)
 
