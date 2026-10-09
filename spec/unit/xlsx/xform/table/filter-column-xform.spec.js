@@ -44,8 +44,11 @@ const expectations = [
     },
     xml:
       '<filterColumn colId="0" hiddenButton="1"><customFilters><customFilter val="*brandywine*"/></customFilters></filterColumn>',
-    get parsedModel() {
-      return this.preparedModel;
+    parsedModel: {
+      colId: '0',
+      filterButton: false,
+      customFilters: [{val: '*brandywine*'}],
+      filterXml: '<customFilters><customFilter val="*brandywine*"/></customFilters>',
     },
     tests: ['prepare', 'render', 'renderIn', 'parse'],
     options: {index: 0},
@@ -58,6 +61,24 @@ const expectations = [
     xml: '<filterColumn colId="2" />',
     parsedModel: {colId: '2', filterButton: true},
     tests: ['parse'],
+  },
+  {
+    title: 'keeps a filter it does not read',
+    create() {
+      return new FilterColumnXform();
+    },
+    xml: '<filterColumn colId="0" hiddenButton="0"><top10 top="1" val="3" filterVal="7"/></filterColumn>',
+    parsedModel: {
+      colId: '0',
+      filterButton: true,
+      filterXml: '<top10 top="1" val="3" filterVal="7"/>',
+    },
+    preparedModel: {
+      colId: '0',
+      filterButton: true,
+      filterXml: '<top10 top="1" val="3" filterVal="7"/>',
+    },
+    tests: ['render', 'renderIn', 'parse'],
   },
 ];
 

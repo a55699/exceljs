@@ -1383,6 +1383,11 @@ headers and row data to the sheet.
 Any data on the sheet covered by the resulting table (including headers and
 totals) will be overwritten.
 
+Excel cannot open a file with some tables, so `addTable` throws an error when
+two columns have the same name or the table would share cells with another
+table. A table without rows gets one empty row, as in Excel, and the column
+names are always written as text in the header row.
+
 ### Table Properties[⬆](#contents)<!-- Link generated with jump2header -->
 
 The following table defines the properties supported by tables.
@@ -1525,6 +1530,25 @@ rows below the changed row move up or down, and their formulas move with them
 each calculated column it has no value for. Cells below the table are not
 moved: a table that grows writes over them.
 
+**Changing the Worksheet Around a Table**
+
+Tables follow the rows and columns of the worksheet as in Excel:
+
+* `spliceRows`, `insertRow(s)` and `duplicateRow` move a table when rows are
+  inserted or deleted above it. Rows inserted in its data or at its totals row
+  become data rows (with the formulas of its calculated columns); deleting the
+  totals row turns the totals off; deleting all the data rows leaves one empty
+  row; deleting all the rows of the table removes it. Deleting the header row
+  without the rest of the table throws an error.
+* `spliceColumns` moves a table when columns are inserted or deleted before it.
+  Columns inserted inside it become table columns named `Column1`, `Column2`...
+  and deleted columns are removed from it.
+* Changing a header cell, as `ws.getCell('B1').value = 'Code'`, renames the
+  column (and the references to it) when the table is committed or the
+  workbook is written.
+
+References to deleted columns, or to a deleted table, become `#REF!`.
+
 **Adding and Removing Columns**
 
 ```javascript
@@ -1592,6 +1616,10 @@ As with "Convert to Range" in Excel, the cells of the table stay and the
 formulas that refer to the table get cell references: `SUM(Sales[Amount])`
 becomes `SUM(Sheet1!$B$2:$B$4)`, and `[@Amount]` in a row becomes
 `Sheet1!$B2`.
+
+A pivot table of a loaded file that is made from a table follows it: renaming
+the table renames its source, and removing the table makes the source the
+header and data rows. The filters of a loaded table are kept as they were.
 
 
 ## Pivot Tables[⬆](#contents)<!-- Link generated with jump2header -->

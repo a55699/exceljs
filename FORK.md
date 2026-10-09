@@ -38,6 +38,10 @@ This AI-assisted workflow enables rapid response to community issues while maint
 - `removeTable` works like Excel's Convert to Range: the formulas that refer to the table get cell references (`SUM(Sales[Qty])` becomes `SUM(Data!$B$2:$B$4)`, `[@Qty]` becomes `Data!$B2`); they turned into `#REF!` before
 - `addTable` and renaming throw an error for a table name Excel cannot open (with a space, like `T1` or `R1C1`) or used by another table of the workbook
 - Fixed: `table.theme` did not change the style, `displayName` could not be set, a table without a header row could not be opened, a function in the totals row of the first column was replaced by the label, and a filter button hidden on one column was hidden on another after loading
+- `spliceRows`, `insertRow(s)`, `duplicateRow` and `spliceColumns` move and size the tables of the worksheet as Excel does; before, a table kept its range, so a file with rows or columns inserted above or before a table could not be opened. Deleting the header row of a table alone throws an error, as Excel refuses it
+- Changing a header cell renames the column and the references to it; before, the file could not be opened
+- Files Excel could not open are no longer written: a table without rows gets one empty row; a column named with a number is written as text; column names with `[`, `]`, `#` or `'` are escaped in the totals formulas; two columns with the same name or two tables sharing cells throw an error
+- The filters of a loaded table are kept (they were lost while the filtered rows stayed hidden, and a Top 10, colour or icon filter made loading fail). A pivot table made from a loaded table follows its rename or removal
 
 ### 4.4.0-protobi.11.a55699.2 (2026-10-09)
 

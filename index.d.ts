@@ -1570,7 +1570,7 @@ export interface Worksheet {
 	/**
 	 *  fetch table
 	 */
-	getTables(): [Table, void][];
+	getTables(): Table[];
 	/**
 	 * add conditionalFormattingOptions
 	 */

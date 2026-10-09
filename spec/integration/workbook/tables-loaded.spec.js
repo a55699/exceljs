@@ -8,11 +8,21 @@ const ExcelJS = verquire('exceljs');
 // formulas that refer to Sales, and table Codes C4:D5 without a header row and
 // without filter buttons.
 const TABLES_FILE = './spec/integration/data/tables-excel.xlsx';
+// Saved by Excel. Data: table Sales A1:B4 filtered on Qty > 1 (row 2 hidden).
+// Pivot: a pivot table made from Sales.
+const FILTER_PIVOT_FILE = './spec/integration/data/tables-filter-pivot.xlsx';
 
-async function loadFile() {
+async function loadFile(file = TABLES_FILE) {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(TABLES_FILE);
+  await workbook.xlsx.readFile(file);
   return workbook;
+}
+
+async function pivotSource(workbook) {
+  const zip = await JSZip.loadAsync(await workbook.xlsx.writeBuffer());
+  const name = Object.keys(zip.files).find(file => /pivotCacheDefinition\d+\.xml$/.test(file));
+  const xml = await zip.file(name).async('string');
+  return xml.match(/<worksheetSource[^>]*\/>/)[0];
 }
 
 async function writeAndLoad(workbook) {
@@ -142,5 +152,34 @@ describe('Tables of a loaded file', () => {
     expect(formulaOf(data, 'G10')).to.equal('Data!$A$1');
     expect(formulaOf(data, 'G12')).to.equal('ROWS(Data!$A$2:$E$4)');
     expect(formulaOf(workbook.getWorksheet('Other Sheet'), 'A2')).to.equal('Data!$B$5');
+  });
+
+  it('renames a column of a loaded table when its header cell is changed', async () => {
+    const loaded = await loadFile();
+    loaded.getWorksheet('Data').getCell('B1').value = 'Quantity';
+    const {tablesXml, workbook} = await writeAndLoad(loaded);
+
+    expect(tablesXml.Sales).to.include('name="Quantity"');
+    expect(formulaOf(workbook.getWorksheet('Data'), 'G7')).to.equal('SUM(Sales[Quantity])');
+  });
+
+  it('keeps the filter of a loaded table', async () => {
+    const {tablesXml, workbook} = await writeAndLoad(await loadFile(FILTER_PIVOT_FILE));
+
+    expect(tablesXml.Sales).to.include(
+      '<filterColumn colId="1" hiddenButton="0"><customFilters><customFilter operator="greaterThan" val="1"/></customFilters></filterColumn>'
+    );
+    expect(workbook.getWorksheet('Data').getRow(2).hidden).to.equal(true);
+  });
+
+  it('changes the pivot table source when a loaded table is renamed or removed', async () => {
+    const renamed = await loadFile(FILTER_PIVOT_FILE);
+    renamed.getWorksheet('Data').getTable('Sales').name = 'Orders';
+    expect(await pivotSource(renamed)).to.equal('<worksheetSource name="Orders"/>');
+
+    const removed = await loadFile(FILTER_PIVOT_FILE);
+    removed.getWorksheet('Data').removeTable('Sales');
+    // as Excel's Convert to Range: the header and data rows
+    expect(await pivotSource(removed)).to.equal('<worksheetSource ref="A1:B4" sheet="Data"/>');
   });
 });
