@@ -46,6 +46,8 @@ This AI-assisted workflow enables rapid response to community issues while maint
 **Fixes**
 
 - `spliceRows`, `insertRow(s)`, `duplicateRow` and `spliceColumns` broke shared formulas (a formula filled down, as Excel saves it): inserting or deleting rows or columns at or above them threw "Shared Formula master must exist above and or left of clone", or wrote a file Excel could not open. The shared formulas they move become a formula in each cell, and the range of a moved array formula moves with it
+- Defined names of a loaded file that are not only cells are kept: names defined by a formula or a constant were dropped (or written as a broken range, like `'SUM(A'!$A$4:$B$4`), and a name of one worksheet became a name of the workbook, so two sheets with their own `Rate` were written with one `Rate` and the formulas of one sheet used the cells of the other. Hidden names stay hidden
+- The print area, print titles and names of a worksheet were given to the wrong worksheet when the file had a chartsheet before it
 
 ### 4.4.0-protobi.11.a55699.2 (2026-10-09)
 

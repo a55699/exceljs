@@ -1160,6 +1160,11 @@ worksheet.getCell('A1').removeName('thing1');
 expect(worksheet.getCell('A1').names).to.have.members(['thing2']);
 ```
 
+The names of a loaded file that are not only cells are kept as they were read
+and written back: names defined by a formula (`SUM(Sheet1!$A$1:$A$9)`) or a
+constant (`0.05`), names of one worksheet (two sheets can each have a `Rate`)
+and hidden names. They are not moved when rows or columns are spliced.
+
 ## Data Validations[⬆](#contents)<!-- Link generated with jump2header -->
 
 Cells can define what values are valid or not and provide prompting to the user to help guide them.
