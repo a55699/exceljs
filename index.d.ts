@@ -1211,6 +1211,85 @@ export interface FormCheckbox {
 	text: string;
 }
 
+/**
+ * A cell or range for a chart: `{sheet, ref}`, where sheet is a worksheet or
+ * its name and ref is like 'B2:B5', or a formula string like
+ * "'Sales Data'!$B$2:$B$5"
+ */
+export type ChartRef = { sheet: Worksheet | string; ref: string } | string;
+
+export type ChartType = 'bar' | 'line' | 'area' | 'pie' | 'doughnut' | 'scatter';
+
+export interface ChartSeries {
+	/** The name shown in the legend: a text, or the cell holding it */
+	name?: ChartRef;
+	/** The category labels (bar, line, area, pie, doughnut) */
+	categories?: ChartRef;
+	/** The values (bar, line, area, pie, doughnut) */
+	values?: ChartRef;
+	/** The X values (scatter) */
+	xValues?: ChartRef;
+	/** The Y values (scatter) */
+	yValues?: ChartRef;
+}
+
+export interface ChartData {
+	sheet: Worksheet | string;
+	/** The range holding the data, e.g. 'A1:C5' */
+	ref: string;
+	/** Each column (default) or each row is a series */
+	seriesIn?: 'columns' | 'rows';
+	/** The first row (or column) holds the series names. Default true */
+	titlesFromData?: boolean;
+	/** The first column (or row) holds the categories (the X values of a scatter chart). Default true */
+	categoriesFromData?: boolean;
+}
+
+export interface ChartAxisOptions {
+	title?: string;
+	min?: number;
+	max?: number;
+	/** Number format of the axis labels, e.g. '#,##0' */
+	numFmt?: string;
+	/** Major gridlines. Default true for y and false for x */
+	gridlines?: boolean;
+}
+
+export interface ChartOptions {
+	type: ChartType;
+	/** The series; give either series or data */
+	series?: ChartSeries[];
+	/** Make one series per column (or row) of a range; give either series or data */
+	data?: ChartData;
+	/** Where to place the chart: a range like 'E2:L17', {tl, br} or {tl, ext} as for images */
+	range: string | ImageRange | ImagePosition | { tl: { col: number; row: number }; br: { col: number; row: number } };
+	/** The chart title; '\n' starts a new line */
+	title?: string;
+	/** x is the category axis (the X values of a scatter chart), y the value axis */
+	axes?: { x?: ChartAxisOptions; y?: ChartAxisOptions };
+	/** The legend position (default 'r'), or false for no legend */
+	legend?: { position?: 'r' | 'l' | 't' | 'b' | 'tr' } | false;
+	/** The name shown in Excel's Selection Pane. Default 'Chart 1', 'Chart 2'... */
+	name?: string;
+	/** bar: 'col' (vertical, default) or 'bar' (horizontal) */
+	direction?: 'col' | 'bar';
+	/** bar: 'clustered' (default); line and area: 'standard' (default); 'stacked'; 'percentStacked' */
+	grouping?: 'clustered' | 'standard' | 'stacked' | 'percentStacked';
+	/** line: show markers. Default true */
+	markers?: boolean;
+	/** doughnut: hole size in percent, 10 to 90. Default 50 */
+	holeSize?: number;
+	/** scatter: draw lines between the points. Default false */
+	lines?: boolean;
+}
+
+export interface Chart {
+	readonly worksheet: Worksheet;
+	readonly type: ChartType;
+	title: string | undefined;
+	name: string | undefined;
+}
+
 export interface Worksheet {
 	readonly id: number;
 	name: string;
@@ -1516,6 +1595,18 @@ export interface Worksheet {
 	 * All form control checkboxes in this worksheet
 	 */
 	getFormCheckboxes(): FormCheckbox[];
+
+	/**
+	 * Add a chart drawn from cell ranges, placed over a range like an image.
+	 * Not supported by the streaming WorkbookWriter.
+	 */
+	addChart(options: ChartOptions): Chart;
+
+	/**
+	 * The charts added to this worksheet with addChart (charts in a loaded
+	 * file are kept as read and not returned)
+	 */
+	getCharts(): Chart[];
 }
 
 export interface CalculationProperties {

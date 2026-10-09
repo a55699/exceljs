@@ -49,6 +49,38 @@ describe('typescript fork API', () => {
     expect(checkbox.link).to.equal('$A$2');
   });
 
+  it('types charts', () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Sales Data');
+    ws.addRows([
+      ['Month', 'East', 'West'],
+      ['Jan', 10, 30],
+      ['Feb', 40, 60],
+    ]);
+    const options: ExcelJSTypes.ChartOptions = {
+      type: 'bar',
+      title: 'Sales',
+      series: [
+        {
+          name: { sheet: ws, ref: 'B1' },
+          categories: { sheet: 'Sales Data', ref: 'A2:A3' },
+          values: "'Sales Data'!$B$2:$B$3",
+        },
+      ],
+      axes: { y: { min: 0, numFmt: '#,##0' } },
+      legend: { position: 'b' },
+      range: 'E2:L17',
+    };
+    const chart: ExcelJSTypes.Chart = ws.addChart(options);
+    ws.addChart({
+      type: 'line',
+      data: { sheet: ws, ref: 'A1:C3' },
+      range: { tl: { col: 4, row: 18 }, ext: { width: 480, height: 288 } },
+    });
+    expect(chart.type).to.equal('bar');
+    expect(ws.getCharts()).to.have.length(2);
+  });
+
   it('types numFmtLimit, addNumberFormat and NumberFormatLimitError', () => {
     const wb = new ExcelJS.Workbook({ numFmtLimit: 1 });
     expect(wb.numFmtLimit).to.equal(1);
