@@ -179,10 +179,6 @@ Note: Please try to avoid modifying the package version in a PR. Versions are up
 
 To be clear, all contributions added to this library will be included in the library's MIT licence.
 
-### Let's chat together:
-
-[![SiemaTeam](https://discordapp.com/api/guilds/976854442009825321/widget.png?style=banner2)](https://discord.gg/siema)
-
 # Contents
 
 <ul>
