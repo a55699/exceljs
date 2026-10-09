@@ -30,7 +30,13 @@ This AI-assisted workflow enables rapid response to community issues while maint
 
 ### 4.4.0-protobi.11.a55699.1 (2026-10-08)
 
-Tagged in the [a55699/exceljs](https://github.com/a55699/exceljs) fork as `v4.4.0-protobi.11.a55699.1`; not published to npm (the latest npm release is 4.4.0-protobi.10). It is 4.4.0-protobi.11, which Protobi has not released yet, plus the changes below. Every change was made on its own branch with tests; changes to the written XML were checked by opening the files in Excel 16.
+First release of the [a55699/exceljs](https://github.com/a55699/exceljs) fork, tagged `v4.4.0-protobi.11.a55699.1` and published to npm as [`@a55699/exceljs`](https://www.npmjs.com/package/@a55699/exceljs). It is 4.4.0-protobi.11, which Protobi has not released yet, plus the changes below. Every change was made on its own branch with tests; changes to the written XML were checked by opening the files in Excel 16.
+
+**Package**
+
+- Renamed from `@protobi/exceljs` to `@a55699/exceljs` (Protobi publishes `@protobi/exceljs`); `repository` points to a55699/exceljs
+- `prepublishOnly` runs `npm run build`, so the published package includes `dist/` (it is not in git); `publishConfig.access` is `public`
+- README: installation and import examples use `@a55699/exceljs`; the migration note says that imports change when switching back to `exceljs`
 
 **Included from 4.4.0-protobi.11**
 

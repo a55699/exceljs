@@ -1,5 +1,5 @@
 {
-  "name": "@protobi/exceljs",
+  "name": "@a55699/exceljs",
   "version": "4.4.0-protobi.11.a55699.1",
   "description": "Excel Workbook Manager - Temporary fork with pivot table enhancements and bug fixes pending upstream merge",
   "private": false,
@@ -10,7 +10,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/protobi/exceljs.git"
+    "url": "https://github.com/a55699/exceljs.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "funding": {
     "type": "individual",
@@ -60,6 +63,7 @@
     "build": "grunt build",
     "install-build": "npm install && grunt build",
     "preversion": "npm run clean && npm run build && npm run test:version",
+    "prepublishOnly": "npm run build",
     "postversion": "git push --no-verify && git push --tags --no-verify"
   },
   "husky": {

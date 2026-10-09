@@ -5,8 +5,8 @@
 > ⚠️ **Temporary Fork** - This is a bridge fork with features pending upstream merge.
 > We recommend using [official exceljs](https://github.com/exceljs/exceljs) if you don't need these specific features.
 
-[![Build Status](https://github.com/exceljs/exceljs/actions/workflows/tests.yml/badge.svg?branch=master&event=push)](https://github.com/exceljs/exceljs/actions/workflows/tests.yml)
-[![npm version](https://badge.fury.io/js/%40protobi%2Fexceljs.svg)](https://www.npmjs.com/package/@protobi/exceljs)
+[![Build Status](https://github.com/a55699/exceljs/actions/workflows/tests.yml/badge.svg?branch=master&event=push)](https://github.com/a55699/exceljs/actions/workflows/tests.yml)
+[![npm version](https://badge.fury.io/js/%40a55699%2Fexceljs.svg)](https://www.npmjs.com/package/@a55699/exceljs)
 
 Read, manipulate and write spreadsheet data and styles to XLSX and JSON.
 
@@ -31,18 +31,24 @@ https://github.com/protobi/exceljs/wiki/Analysis-of-open-pull-requests-in-ExcelJ
 ## Installation
 
 ```bash
-npm install @protobi/exceljs
+npm install @a55699/exceljs
 ```
+
+```javascript
+const ExcelJS = require('@a55699/exceljs');
+```
+
+This fork is published as `@a55699/exceljs`. Protobi's fork is published separately as [`@protobi/exceljs`](https://www.npmjs.com/package/@protobi/exceljs) and the official package as [`exceljs`](https://www.npmjs.com/package/exceljs).
 
 ## Migration Path
 
-Once upstream merges our changes (tracking 15 PRs, see [FORK.md](FORK.md#status-tracking)), switch back:
+Once upstream merges these changes (tracking 15 PRs, see [FORK.md](FORK.md#status-tracking)), switch back:
 
 ```bash
 npm install exceljs  # Official package
 ```
 
-No code changes needed - we're API-compatible!
+The API is the same; change the package name in your imports from `@a55699/exceljs` to `exceljs`. Features that are only in this fork (see [FORK.md](FORK.md)) are not available there.
 
 ## Fork Status
 
@@ -50,7 +56,7 @@ See [FORK.md](FORK.md) for detailed tracking of upstream PRs.
 
 ## Security & Maintenance
 
-**Latest Version:** 4.4.0-protobi.11.a55699.1 (October 2026), tagged in this fork and not published to npm. The latest npm release is 4.4.0-protobi.10 (May 2026).
+**Latest Version:** 4.4.0-protobi.11.a55699.1 (October 2026), published to npm as `@a55699/exceljs`.
 
 This fork receives active security maintenance:
 -  Dependencies regularly updated
@@ -61,7 +67,8 @@ See [FORK.md Release History](FORK.md#fork-release-history) for details.
 
 ## Fork Release Notes
 
-**4.4.0-protobi.11.a55699.1** (October 2026) - Pivot Table Fixes, Form Controls on Load, Note Fixes
+**4.4.0-protobi.11.a55699.1** (October 2026) - First npm release as `@a55699/exceljs`: Pivot Table Fixes, Form Controls on Load, Note Fixes
+- Published as `@a55699/exceljs` (renamed from `@protobi/exceljs`); installation and import examples use the new name
 - Includes 4.4.0-protobi.11 (not yet released by Protobi): `numFmtLimit` and `Workbook#addNumberFormat()` guard against too many number formats
 - **Pivot tables** - Escape XML in names and values, reject empty or duplicate headers, write Excel-compatible value types and counts, much faster on large sources, add pivot tables to loaded workbooks that already have them, and rebuild the cache from the source data when writing
 - **Form controls** - Checkboxes are read when loading (`getFormCheckboxes()`) and other form controls (buttons, drop-downs, spinners...) are kept, so a load + write no longer removes them. A checkbox linked to an empty cell writes its checked state there, since Excel shows the linked cell's value
@@ -116,7 +123,7 @@ Contact: [info@protobi.com](mailto:info@protobi.com)
 # Installation
 
 ```shell
-npm install exceljs
+npm install @a55699/exceljs
 ```
 
 # New Features!
@@ -285,7 +292,7 @@ To be clear, all contributions added to this library will be included in the lib
 # Importing[⬆](#contents)<!-- Link generated with jump2header -->
 
 ```javascript
-const ExcelJS = require('exceljs');
+const ExcelJS = require('@a55699/exceljs');
 ```
 
 ## ES5 Imports[⬆](#contents)<!-- Link generated with jump2header -->
@@ -293,7 +300,7 @@ const ExcelJS = require('exceljs');
 To use the ES5 transpiled code, for example for node.js versions older than 10, use the dist/es5 path.
 
 ```javascript
-const ExcelJS = require('exceljs/dist/es5');
+const ExcelJS = require('@a55699/exceljs/dist/es5');
 ```
 
 **Note:** The ES5 build has an implicit dependency on a number of polyfills which are no longer
@@ -311,7 +318,7 @@ require('core-js/modules/es.symbol');
 require('core-js/modules/es.symbol.async-iterator');
 require('regenerator-runtime/runtime');
 
-const ExcelJS = require('exceljs/dist/es5');
+const ExcelJS = require('@a55699/exceljs/dist/es5');
 ```
 
 For IE 11, you'll also need a polyfill to support unicode regex patterns. For example,
@@ -1545,7 +1552,7 @@ Pivot tables provide powerful data analysis capabilities by summarizing and reor
 To add a pivot table to a worksheet, call `addPivotTable` with a configuration object:
 
 ```javascript
-const ExcelJS = require('exceljs');
+const ExcelJS = require('@a55699/exceljs');
 const workbook = new ExcelJS.Workbook();
 
 // Create source data worksheet
@@ -3220,7 +3227,7 @@ rows are all removed is dropped. `spliceColumns` does not move merged cells.
 
 ## Fork Releases
 
-For @protobi/exceljs release history, see [FORK.md Release History](FORK.md#fork-release-history).
+For the release history of this fork (`@a55699/exceljs`) and of `@protobi/exceljs`, see [FORK.md Release History](FORK.md#fork-release-history).
 
 ## Upstream Releases
 
