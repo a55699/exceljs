@@ -18,6 +18,7 @@ If you need **today**:
 -  Multiple pivot tables from same source data
 -  Pivot table count metric (`metric: 'count'`)
 -  **Pivot table and chart round-trip preservation** (read files with existing pivot tables/charts, write them back without corruption)
+-  **Charts** - `worksheet.addChart()` for bar, line, area, pie, doughnut and scatter charts (see [Charts](#charts))
 -  Critical bug fixes (XML parsing, date handling, streaming)
 
 All features are submitted to upstream. [See merge status →](FORK.md)
@@ -56,7 +57,7 @@ See [FORK.md](FORK.md) for detailed tracking of upstream PRs.
 
 ## Security & Maintenance
 
-**Latest Version:** 4.4.0-protobi.11.a55699.1 (October 2026), published to npm as `@a55699/exceljs`.
+**Latest Version:** 4.4.0-protobi.11.a55699.2 (October 2026), package `@a55699/exceljs`.
 
 This fork receives active security maintenance:
 -  Dependencies regularly updated
@@ -67,8 +68,14 @@ See [FORK.md Release History](FORK.md#fork-release-history) for details.
 
 ## Fork Release Notes
 
-**4.4.0-protobi.11.a55699.1** (October 2026) - First npm release as `@a55699/exceljs`: Pivot Table Fixes, Form Controls on Load, Note Fixes
-- Published as `@a55699/exceljs` (renamed from `@protobi/exceljs`); installation and import examples use the new name
+**4.4.0-protobi.11.a55699.2** (October 2026) - Charts
+- **Charts** - `worksheet.addChart()` adds bar, line, area, pie, doughnut and scatter charts drawn from cell ranges, with titles, axis options and legend; see [Charts](#charts)
+- **Fix** - Adding an image to a loaded workbook with a chart no longer writes a file Excel cannot open; charts, shapes and pictures of loaded files are kept next to new images and charts
+- **Fix** - A loaded workbook with a text box drawn over a chart can be opened after it is written again
+- **Fix** - The same image added to two worksheets keeps its relationship on both (protobi/exceljs#24)
+
+**4.4.0-protobi.11.a55699.1** (October 2026) - Package `@a55699/exceljs`: Pivot Table Fixes, Form Controls on Load, Note Fixes
+- Renamed from `@protobi/exceljs` to `@a55699/exceljs`; installation and import examples use the new name
 - Includes 4.4.0-protobi.11 (not yet released by Protobi): `numFmtLimit` and `Workbook#addNumberFormat()` guard against too many number formats
 - **Pivot tables** - Escape XML in names and values, reject empty or duplicate headers, write Excel-compatible value types and counts, much faster on large sources, add pivot tables to loaded workbooks that already have them, and rebuild the cache from the source data when writing
 - **Form controls** - Checkboxes are read when loading (`getFormCheckboxes()`) and other form controls (buttons, drop-downs, spinners...) are kept, so a load + write no longer removes them. A checkbox linked to an empty cell writes its checked state there, since Excel shows the linked cell's value

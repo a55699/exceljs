@@ -1,6 +1,6 @@
 {
   "name": "@a55699/exceljs",
-  "version": "4.4.0-protobi.11.a55699.1",
+  "version": "4.4.0-protobi.11.a55699.2",
   "description": "Excel Workbook Manager - Temporary fork with pivot table enhancements and bug fixes pending upstream merge",
   "private": false,
   "license": "MIT",
