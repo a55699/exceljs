@@ -1563,13 +1563,14 @@ export interface Worksheet {
 	 */
 	getTable(name: string): Table;
 	/**
-	 * delete table by name or id
+	 * delete table by name or id. As with Excel's Convert to Range, the cells
+	 * stay and the formulas that refer to the table get cell references
 	 */
 	removeTable(name: string): void;
 	/**
 	 *  fetch table
 	 */
-	getTables(): [Table, void][];
+	getTables(): Table[];
 	/**
 	 * add conditionalFormattingOptions
 	 */
@@ -2080,8 +2081,8 @@ export interface TableColumnProperties {
 	  */
 	filterButton?: boolean;
 	/**
-	  * Label to describe the totals row (first column)
-	  * @default 'Total'
+	  * Label shown in the totals row when the column has no totals function
+	  * @default 'Total' for the first column
 	  */
 	totalsRowLabel?: string;
 	/**
@@ -2095,6 +2096,12 @@ export interface TableColumnProperties {
 	totalsRowFormula?: string;
 
 	/**
+	 * Formula of a calculated column, e.g. 'Sales[[#This Row],[Qty]]*2': a row
+	 * added without a value for this column gets it, as in Excel
+	 */
+	calculatedColumnFormula?: string;
+
+	/**
 	 * Styles applied to the column
 	 */
 	style?: Partial<Style>;
@@ -2103,7 +2110,9 @@ export interface TableColumnProperties {
 
 export interface TableProperties {
 	/**
-	 * The name of the table
+	 * The name of the table, unique in the workbook. It starts with a letter,
+	 * _ or \, has no spaces and is not like a cell reference (A1, R1C1).
+	 * Setting the name of a table renames the references to it in formulas
 	 */
 	name: string;
 	/**
@@ -2142,6 +2151,10 @@ export interface TableProperties {
 export type TableColumn = Required<TableColumnProperties>
 
 export interface Table extends Required<TableProperties> {
+	/**
+	 * The table style, e.g. 'TableStyleMedium2'
+	 */
+	theme: TableStyleProperties['theme'];
 	/**
 	 * Commit changes
 	 */

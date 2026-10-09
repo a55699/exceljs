@@ -81,6 +81,26 @@ describe('typescript fork API', () => {
     expect(ws.getCharts()).to.have.length(2);
   });
 
+  it('types table edits', () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Data');
+    const table: ExcelJSTypes.Table = ws.addTable({
+      name: 'Sales',
+      ref: 'A1',
+      columns: [
+        { name: 'Qty' },
+        { name: 'Double', calculatedColumnFormula: 'Sales[[#This Row],[Qty]]*2' },
+      ],
+      rows: [[1, { formula: 'Sales[[#This Row],[Qty]]*2' }]],
+    });
+    table.addRow([2]);
+    table.name = 'Orders';
+    table.theme = 'TableStyleLight9';
+    ws.getCell('D1').value = { formula: 'SUM(Orders[Qty])', date1904: false };
+    ws.removeTable('Orders');
+    expect(ws.getCell('D1').formula).to.equal('SUM(Data!$A$2:$A$3)');
+  });
+
   it('types numFmtLimit, addNumberFormat and NumberFormatLimitError', () => {
     const wb = new ExcelJS.Workbook({ numFmtLimit: 1 });
     expect(wb.numFmtLimit).to.equal(1);
