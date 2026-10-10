@@ -1679,6 +1679,7 @@ export interface JSZipGeneratorOptions {
 	compression: 'STORE' | 'DEFLATE';
 	compressionOptions: null | {
 		/**
+		 * From 0 to 9. 0 stores the parts without compression
 		 * @default 6
 		 */
 		level: number;
@@ -2233,6 +2234,10 @@ export namespace stream {
 			 */
 			chunkSize: number;
 			windowBits: number;
+			/**
+			 * From 0 to 9. 0 stores the parts without compression
+			 * @default 1
+			 */
 			level: number; // compression only
 			memLevel: number; // compression only
 			strategy: number; // compression only
@@ -2242,8 +2247,7 @@ export namespace stream {
 		interface WorkbookStreamWriterOptions extends WorkbookWriterOptions {
 
 			/**
-			 * Specifies whether to add style information to the workbook.
-			 * Styles can add some performance overhead. Default is false
+			 * The options passed to Archiver, which zips the workbook
 			 */
 			zip: Partial<ArchiverZipOptions>;
 		}
